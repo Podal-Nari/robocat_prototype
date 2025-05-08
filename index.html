@@ -1,0 +1,112 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bingpot's 3D RoboCat</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #121212;
+        font-family: sans-serif;
+      }
+      canvas {
+        display: block;
+      }
+      #ui {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 10;
+      }
+      .face-button {
+        width: 64px;
+        height: 64px;
+        border: none;
+        border-radius: 8px;
+        background-color: #fff;
+        background-size: cover;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      .face-button:hover {
+        transform: scale(1.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="ui">
+      <button class="face-button" style="background-image:url('face_happy.png')" data-face="face_happy.png"></button>
+      <button class="face-button" style="background-image:url('face_sad.png')" data-face="face_sad.png"></button>
+      <button class="face-button" style="background-image:url('face_angry.png')" data-face="face_angry.png"></button>
+    </div>
+
+    <script type="module">
+      import * as THREE from 'https://esm.sh/three@0.152.2';
+      import { GLTFLoader } from 'https://esm.sh/three@0.152.2/examples/jsm/loaders/GLTFLoader.js';
+      import { OrbitControls } from 'https://esm.sh/three@0.152.2/examples/jsm/controls/OrbitControls.js';
+
+      let scene = new THREE.Scene();
+      let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(0, 1.5, 3);
+
+      let renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+      dirLight.position.set(2, 5, 3);
+      scene.add(dirLight);
+
+      let robocat;
+      let faceMesh;
+
+      const loader = new GLTFLoader();
+      loader.load('lowpolyrobocat.glb', (gltf) => {
+        robocat = gltf.scene;
+        robocat.scale.set(1, 1, 1);
+        scene.add(robocat);
+
+        robocat.traverse((child) => {
+          if (child.isMesh && child.name === 'Cube.001') {
+            faceMesh = child;
+            console.log('✅ 얼굴 메쉬 찾음:', faceMesh);
+          }
+        });
+      });
+
+      document.querySelectorAll('.face-button').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const textureURL = btn.getAttribute('data-face');
+          const texture = new THREE.TextureLoader().load(textureURL);
+          if (faceMesh) {
+            faceMesh.material.map = texture;
+            faceMesh.material.needsUpdate = true;
+          }
+        });
+      });
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>
