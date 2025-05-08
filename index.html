@@ -52,8 +52,9 @@
       import { OrbitControls } from 'https://esm.sh/three@0.152.2/examples/jsm/controls/OrbitControls.js';
 
       let scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x222222);
       let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.set(0, 1.5, 3);
+      camera.position.set(0, 1.2, 4);
 
       let renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -88,6 +89,7 @@
         btn.addEventListener('click', () => {
           const textureURL = btn.getAttribute('data-face');
           const texture = new THREE.TextureLoader().load(textureURL);
+          console.log("🔍 기존 머티리얼 상태:", faceMesh.material);  
           if (faceMesh) {
             faceMesh.material.map = texture;
             faceMesh.material.needsUpdate = true;
