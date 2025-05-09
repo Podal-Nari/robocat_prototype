@@ -46,8 +46,6 @@
       <button class="face-button" style="background-image:url('face_angry.png')" data-face="face_angry.png"></button>
     </div>
 
-  
-    
     <script type="module">
       import * as THREE from 'https://esm.sh/three@0.152.2';
       import { GLTFLoader } from 'https://esm.sh/three@0.152.2/examples/jsm/loaders/GLTFLoader.js';
@@ -55,11 +53,9 @@
 
       let scene = new THREE.Scene();
       scene.background = new THREE.Color(0x222222);
+
       let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
       camera.position.set(0, 1.2, 5);
-      controls.target.set(0, 1, 0); // 고양이 중심 쪽으로 시선 이동
-      controls.update();
-      
 
       let renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -67,6 +63,8 @@
 
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
+      controls.target.set(0, 1, 0);
+      controls.update();
 
       scene.add(new THREE.AmbientLight(0xffffff, 0.6));
       const dirLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -81,10 +79,14 @@
         robocat = gltf.scene;
         robocat.scale.set(1, 1, 1);
         scene.add(robocat);
-        
+
         robocat.traverse((child) => {
           if (child.isMesh) {
-      console.log("🔍 찾은 메쉬:", child.name);
+            console.log("🔍 찾은 메쉬:", child.name);
+            if (child.name === 'Cube.001') {
+              faceMesh = child;
+              console.log("✅ 얼굴 메쉬 지정 완료");
+            }
           }
         });
       });
@@ -93,10 +95,12 @@
         btn.addEventListener('click', () => {
           const textureURL = btn.getAttribute('data-face');
           const texture = new THREE.TextureLoader().load(textureURL);
-          console.log("🔍 기존 머티리얼 상태:", faceMesh.material);  
           if (faceMesh) {
+            console.log("🎯 텍스처 교체 중:", textureURL);
             faceMesh.material.map = texture;
             faceMesh.material.needsUpdate = true;
+          } else {
+            console.warn("⚠️ faceMesh가 아직 준비되지 않았습니다");
           }
         });
       });
