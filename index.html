@@ -46,6 +46,8 @@
       <button class="face-button" style="background-image:url('face_angry.png')" data-face="face_angry.png"></button>
     </div>
 
+  
+    
     <script type="module">
       import * as THREE from 'https://esm.sh/three@0.152.2';
       import { GLTFLoader } from 'https://esm.sh/three@0.152.2/examples/jsm/loaders/GLTFLoader.js';
@@ -54,7 +56,10 @@
       let scene = new THREE.Scene();
       scene.background = new THREE.Color(0x222222);
       let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.set(0, 1.2, 4);
+      camera.position.set(0, 1.2, 5);
+      controls.target.set(0, 1, 0); // 고양이 중심 쪽으로 시선 이동
+      controls.update();
+      
 
       let renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -76,11 +81,10 @@
         robocat = gltf.scene;
         robocat.scale.set(1, 1, 1);
         scene.add(robocat);
-
+        
         robocat.traverse((child) => {
-          if (child.isMesh && child.name === 'Cube.001') {
-            faceMesh = child;
-            console.log('✅ 얼굴 메쉬 찾음:', faceMesh);
+          if (child.isMesh) {
+      console.log("🔍 찾은 메쉬:", child.name);
           }
         });
       });
